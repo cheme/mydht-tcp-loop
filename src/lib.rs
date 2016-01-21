@@ -117,6 +117,7 @@ use mydht_base::utils::{self,OneResult};
 //use std::os::unix::io::FromRawFd;
 use self::coroutine::Coroutine;
 use self::coroutine::Handle as CoHandle;
+use mydht_base::transport::{SerSocketAddr};
 
 #[cfg(feature="with-extra-test")]
 #[cfg(test)]
@@ -126,7 +127,9 @@ use mydht_basetest::transport::connect_rw_with_optional;
 use mydht_basetest::transport::connect_rw_with_optional_non_managed;
 #[cfg(feature="with-extra-test")]
 #[cfg(test)]
-use mydht_base::utils::{SocketAddrExt,sa4};
+use mydht_base::utils::{sa4};
+
+
 #[cfg(feature="with-extra-test")]
 #[cfg(test)]
 use std::net::Ipv4Addr;
@@ -567,7 +570,7 @@ impl ReadTcpStream {
 impl Transport for Tcp {
   type ReadStream = ReadTcpStream;
   type WriteStream = WriteTcpStream;
-  type Address = SocketAddr;
+  type Address = SerSocketAddr;
 
   /// if spawn we do not loop (otherwhise we should not event loop at all), the thread is just for
   /// one message.
@@ -608,7 +611,7 @@ impl Transport for Tcp {
     Ok(())
   }
 
-  fn connectwith(&self,  p : &SocketAddr, timeout : Duration) -> IoResult<(Self::WriteStream, Option<Self::ReadStream>)> {
+  fn connectwith(&self,  p : &SerSocketAddr, timeout : Duration) -> IoResult<(Self::WriteStream, Option<Self::ReadStream>)> {
     let s = try!(MioTcpStream::connect(p));
     try!(s.set_keepalive (self.keepalive.map(|d|d.num_seconds().to_u32().unwrap())));
     let ws = try!(s.try_clone());
@@ -690,7 +693,7 @@ impl Transport for Tcp {
   }
 
   /// deregister the read stream for this address
-  fn disconnect(&self, sock : &SocketAddr) -> IoResult<bool> {
+  fn disconnect(&self, sock : &SerSocketAddr) -> IoResult<bool> {
     // TODO  deregister ReadStream : PB we do not have mapping address stream token -> TODO add
     // this mapping (costy...
 
@@ -863,8 +866,8 @@ impl Write for WriteTcpStream {
 fn connect_rw () {
   let start_port = 40000;
 
-  let a1 = SocketAddrExt(sa4(Ipv4Addr::new(127,0,0,1), start_port));
-  let a2 = SocketAddrExt(sa4(Ipv4Addr::new(127,0,0,1), start_port+1));
+  let a1 = SerSocketAddr(sa4(Ipv4Addr::new(127,0,0,1), start_port));
+  let a2 = SerSocketAddr(sa4(Ipv4Addr::new(127,0,0,1), start_port+1));
   let tcp_transport_1 : Tcp = Tcp::new (&a1, Some(Duration::seconds(5)), Duration::seconds(5), true, false).unwrap();
   let tcp_transport_2 : Tcp = Tcp::new (&a2, Some(Duration::seconds(5)), Duration::seconds(5), true, false).unwrap();
   // TODO test with spawn
@@ -878,10 +881,10 @@ fn connect_rw () {
 fn connect_rw_corout () {
   let start_port = 40400;
 
-  let a1 = SocketAddrExt(sa4(Ipv4Addr::new(127,0,0,1), start_port));
-  let a2 = SocketAddrExt(sa4(Ipv4Addr::new(127,0,0,1), start_port+1));
-  let a3 = SocketAddrExt(sa4(Ipv4Addr::new(127,0,0,1), start_port+2));
-  let a4 = SocketAddrExt(sa4(Ipv4Addr::new(127,0,0,1), start_port+3));
+  let a1 = SerSocketAddr(sa4(Ipv4Addr::new(127,0,0,1), start_port));
+  let a2 = SerSocketAddr(sa4(Ipv4Addr::new(127,0,0,1), start_port+1));
+  let a3 = SerSocketAddr(sa4(Ipv4Addr::new(127,0,0,1), start_port+2));
+  let a4 = SerSocketAddr(sa4(Ipv4Addr::new(127,0,0,1), start_port+3));
   let tcp_transport_1 : Tcp = Tcp::new (&a1, Some(Duration::seconds(5)), Duration::seconds(5), false, false).unwrap();
   let tcp_transport_2 : Tcp = Tcp::new (&a2, Some(Duration::seconds(5)), Duration::seconds(5), false, false).unwrap();
   let tcp_transport_3 : Tcp = Tcp::new (&a3, Some(Duration::seconds(5)), Duration::seconds(5), false, false).unwrap();
