@@ -33,8 +33,6 @@ path = "../mydht-basetest/"
 #git = "https://github.com/cheme/mydht-basetest.git"
 #features = ["mio-impl"]
 
-
-
 #[dependencies.bit-vec]
 #git = "https://github.com/cheme/bit-vec.git"
 
@@ -47,5 +45,4 @@ version = "0.4.0"
 #git = "https://github.com/cheme/coroutine-rs.git"
 path = "../../mydht-dep/coroutine-rs/"
 #optional = true
-
 
